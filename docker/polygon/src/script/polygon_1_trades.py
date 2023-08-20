@@ -1,10 +1,6 @@
 import os
-from cryptofeed import FeedHandler
-from cryptofeed.defines import TRADES
-from cryptofeed.exchanges import Coinbase, Bitstamp
 
-import src.cryptofeed_tools as cft
-
+from src.polygon_config import equities, spawn_equity_trade_webhook_client, KafkaCallback
 
 def main():
     # see docker_files/Dockerfile.cryptofeed where we set IS_DOCKER=True
@@ -13,14 +9,16 @@ def main():
     kakfa_bootstrap = 'redpanda' if os.environ.get('IS_DOCKER') else 'localhost'
     kakfa_port = 29092 if os.environ.get('IS_DOCKER') else 9092
 
-    ch_tradekafka = cft.ClickHouseTradeKafka(bootstrap=kakfa_bootstrap, port=kakfa_port)
+    kafka = KafkaCallback(
+                bootstrap=kakfa_bootstrap, 
+                port=kakfa_port,
+                topic = 'polygon-trades'
+                )
 
-    f = FeedHandler()
-    f.add_feed(Coinbase(channels=[TRADES],
-                        symbols=cft.SYMBOLS,
-                        callbacks={TRADES: [ch_tradekafka, cft.my_print]}))
-    f.run()
-
+    spawn_equity_trade_webhook_client(
+                equities = equities,
+                handler = kafka.write
+                )
 
 if __name__ == '__main__':
     main()

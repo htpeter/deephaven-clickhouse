@@ -81,18 +81,20 @@ services:
     networks:
         - ch_ntw
 
-  cryptofeed:
-    container_name: cryptofeed
-    build:
-      context: docker/cryptofeed
-    depends_on:
-      redpanda:
-        condition: service_healthy
-    networks:
-      - ch_ntw
+  # cryptofeed:
+  #  container_name: cryptofeed
+  #  build:
+  #    context: docker/cryptofeed
+  #  depends_on:
+  #    redpanda:
+  #      condition: service_healthy
+  #  networks:
+  #    - ch_ntw
 
   polygon:
     container_name: polygon 
+    env_file:
+      - shared.env
     build:
       context: docker/polygon
     depends_on:

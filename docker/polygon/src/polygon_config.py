@@ -39,12 +39,16 @@ class KafkaCallback:
                                              loop=loop,
                                              bootstrap_servers=f'{self.bootstrap}:{self.port}' if isinstance(
                                                  self.bootstrap, str) else self.bootstrap,
-                                             client_id='cryptofeed')
+                                             client_id='polygon')
             await self.producer.start()
 
     async def write(self, data: dict):
         await self._connect()
-        await self.producer.send_and_wait(self.topic, json.dumps(data).encode('utf-8'))
+        for i in data:
+            await self.producer.send_and_wait(
+                        self.topic, 
+                        json.dumps(i).encode('utf-8')
+                        )
 
 def print_handler(msgs: List[WebSocketMessage]):
     for m in msgs:
